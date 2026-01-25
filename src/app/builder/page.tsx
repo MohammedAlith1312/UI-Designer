@@ -202,12 +202,16 @@ function ComponentPalette() {
                 </div>
 
                 <div>
-                    <h3 className="text-xs font-bold text-zinc-400 uppercase mb-3 text-left">Form Layout</h3>
+                    <h3 className="text-xs font-bold text-zinc-400 uppercase mb-3 text-left">Form Elements</h3>
                     <div className="grid grid-cols-2 gap-2">
                         <PaletteItem label="Form" onClick={() => addComponent(targetId, 'form')} />
                         <PaletteItem label="Group" onClick={() => addComponent(targetId, 'form-group')} />
                         <PaletteItem label="Input" onClick={() => addComponent(targetId, 'input')} />
-                        <PaletteItem label="Select" onClick={() => addComponent(targetId, 'select')} />
+                        <PaletteItem label="Textarea" onClick={() => addComponent(targetId, 'textarea')} />
+                        <PaletteItem label="Dropdown" onClick={() => addComponent(targetId, 'select')} />
+                        <PaletteItem label="Radio" onClick={() => addComponent(targetId, 'radio')} />
+                        <PaletteItem label="Checkbox" onClick={() => addComponent(targetId, 'checkbox')} />
+                        <PaletteItem label="Button" onClick={() => addComponent(targetId, 'button')} fullWidth />
                     </div>
                 </div>
 

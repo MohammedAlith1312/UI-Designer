@@ -6,10 +6,10 @@ import React from "react";
 import ComponentRegistry from "@/lib/dynamic-ui/registry";
 import { ScreenSchema, ComponentSchema } from "@/types/schema";
 import { DynamicUIProvider } from "@/lib/dynamic-ui/context";
+import { useDroppable } from "@dnd-kit/core";
 
-/**
- * Renders a single schema node recursively.
- */
+const CONTAINER_TYPES = ["container", "stack", "grid", "column", "section", "hero-section", "feature-section", "footer-section", "cta-section"];
+
 interface RenderProps {
     isEditor?: boolean;
     onSelect?: (node: ComponentSchema) => void;
@@ -17,10 +17,18 @@ interface RenderProps {
 }
 
 /**
- * Renders a single schema node recursively.
+ * Recursive Node Renderer Component
  */
-function renderNode(node: ComponentSchema, options: RenderProps): React.ReactNode {
+function NodeRenderer({ node, options }: { node: ComponentSchema, options: RenderProps }) {
     const Component = ComponentRegistry[node.type];
+    const isContainer = CONTAINER_TYPES.includes(node.type) || node.type.endsWith("-section");
+
+    // Dnd Hook (only active for containers in editor)
+    const { setNodeRef, isOver } = useDroppable({
+        id: node.id || "unknown",
+        disabled: !options.isEditor || !isContainer,
+        data: { type: node.type }
+    });
 
     if (!Component) {
         return (
@@ -32,14 +40,12 @@ function renderNode(node: ComponentSchema, options: RenderProps): React.ReactNod
 
     const props = {
         ...(node.props || {}),
-        style: node.style, // Pass style through to component
+        style: { ...(node.style || {}), ...(node.props?.style || {}) },
     };
 
     const children = (node.children && node.children.length > 0)
         ? node.children.map((child, index) => (
-            <React.Fragment key={child.id || index}>
-                {renderNode(child, options)}
-            </React.Fragment>
+            <NodeRenderer key={child.id || index} node={child} options={options} />
         ))
         : null;
 
@@ -51,21 +57,25 @@ function renderNode(node: ComponentSchema, options: RenderProps): React.ReactNod
 
     if (options.isEditor) {
         const isSelected = options.selectedId === node.id;
+
         return (
             <div
+                ref={isContainer ? setNodeRef : undefined}
                 onClick={(e) => {
                     e.stopPropagation();
                     options.onSelect?.(node);
                 }}
                 className={`relative group transition-all duration-200 cursor-pointer 
                     ${isSelected
-                        ? 'ring-2 ring-blue-500 rounded-lg z-10'
-                        : 'hover:ring-1 hover:ring-blue-300 hover:bg-blue-50/10 rounded-lg'
-                    }`}
+                        ? 'ring-2 ring-indigo-500 rounded-lg z-10'
+                        : 'hover:ring-1 hover:ring-indigo-300 rounded-lg'
+                    }
+                    ${isOver ? 'bg-indigo-50/50 ring-2 ring-indigo-400 ring-offset-2' : ''}
+                `}
             >
                 {/* ID Tag on Hover/Select */}
-                {(isSelected) && (
-                    <div className="absolute -top-3 -right-2 bg-blue-500 text-white text-[9px] px-1.5 py-0.5 rounded shadow-sm z-20 font-mono">
+                {isSelected && (
+                    <div className="absolute -top-3 -right-2 bg-indigo-500 text-white text-[9px] px-1.5 py-0.5 rounded shadow-sm z-20 font-mono">
                         {node.type}
                     </div>
                 )}
@@ -79,7 +89,6 @@ function renderNode(node: ComponentSchema, options: RenderProps): React.ReactNod
 
 /**
  * Top-level Dynamic Renderer component.
- * Accepts a full ScreenSchema and renders it.
  */
 export default function DynamicRenderer({
     schema,
@@ -98,7 +107,8 @@ export default function DynamicRenderer({
                 {schema.title && (
                     <h1 className="text-3xl font-bold mb-6 font-outfit text-zinc-900">{schema.title}</h1>
                 )}
-                {renderNode(schema.root, { isEditor, onSelect, selectedId })}
+                {/* Render Root */}
+                <NodeRenderer node={schema.root} options={{ isEditor, onSelect, selectedId }} />
             </div>
         </DynamicUIProvider>
     );

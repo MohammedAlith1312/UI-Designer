@@ -10,13 +10,14 @@ interface SelectOption {
 
 interface SelectProps {
     label?: string;
+    placeholder?: string;
     name?: string;
     id?: string;
     options: SelectOption[];
     defaultValue?: string | number;
 }
 
-export const Select: React.FC<SelectProps> = ({ label, name, id, options = [], defaultValue }) => {
+export const Select: React.FC<SelectProps> = ({ label, placeholder, name, id, options = [], defaultValue }) => {
     const { getValue, setValue } = useUIState();
     const stateKey = name || id || label?.toLowerCase().replace(/\s+/g, '_') || 'unnamed_select';
 
@@ -34,7 +35,7 @@ export const Select: React.FC<SelectProps> = ({ label, name, id, options = [], d
                 onChange={(e) => setValue(stateKey, e.target.value)}
                 className="w-full px-4 py-2 border border-zinc-200 rounded-lg focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all bg-white font-inter text-sm"
             >
-                <option value="" disabled>Select an option...</option>
+                <option value="" disabled>{placeholder || "Select an option..."}</option>
                 {options.map((opt) => (
                     <option key={opt.value} value={opt.value}>
                         {opt.label}

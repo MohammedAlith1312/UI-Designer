@@ -65,8 +65,11 @@ export const Stack: React.FC<any> = ({
     width = "full",
     padding = 0,
     margin = 0,
+    className,
+    style
 }) => (
     <div
+        style={style}
         className={[
             "flex",
             flexDirMap[direction],
@@ -76,6 +79,7 @@ export const Stack: React.FC<any> = ({
             widthMap[width],
             paddingMap[padding],
             marginMap[margin],
+            className || ""
         ].join(" ")}
     >
         {children}

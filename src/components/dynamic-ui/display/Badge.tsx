@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const Badge: React.FC<any> = ({ text, variant = "neutral", className }: any) => {
+export const Badge: React.FC<any> = ({ text, variant = "neutral", className, style }: any) => {
     const baseClass = "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
 
     const variants: Record<string, string> = {
@@ -12,7 +12,7 @@ export const Badge: React.FC<any> = ({ text, variant = "neutral", className }: a
     };
 
     return (
-        <span className={`${baseClass} ${variants[variant] || variants.neutral} ${className || ""}`}>
+        <span className={`${baseClass} ${variants[variant] || variants.neutral} ${className || ""}`} style={style}>
             {text}
         </span>
     );

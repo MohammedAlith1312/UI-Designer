@@ -1,8 +1,11 @@
 import React from 'react';
 
-export const Image: React.FC<any> = ({ src, alt, className, width, height }: any) => {
+export const Image: React.FC<any> = ({ src, alt, className, width, height, style }: any) => {
     return (
-        <div className={`overflow-hidden rounded-lg ${className || ''}`} style={{ width: width || 'auto', height: height || 'auto' }}>
+        <div
+            className={`overflow-hidden rounded-lg ${className || ''}`}
+            style={{ width: width || 'auto', height: height || 'auto', ...style }}
+        >
             {src ? (
                 <img
                     src={src}

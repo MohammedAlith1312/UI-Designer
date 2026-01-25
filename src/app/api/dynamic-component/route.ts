@@ -24,3 +24,20 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Failed to save component' }, { status: 500 });
     }
 }
+
+export async function DELETE(request: Request) {
+    try {
+        const { searchParams } = new URL(request.url);
+        const id = searchParams.get('id');
+
+        if (!id) {
+            return NextResponse.json({ error: 'Component ID is required' }, { status: 400 });
+        }
+
+        await ComponentService.deleteComponent(id);
+        return NextResponse.json({ success: true, message: 'Component deleted' });
+    } catch (error) {
+        console.error("Delete Error:", error);
+        return NextResponse.json({ error: 'Failed to delete component' }, { status: 500 });
+    }
+}

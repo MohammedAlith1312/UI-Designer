@@ -21,6 +21,8 @@ interface EditorContextType {
     addComponent: (parentId: string, type: any) => void; // Simplified type for now
     saveSchema: () => Promise<boolean>;
     isSaving: boolean;
+    viewMode: 'desktop' | 'tablet' | 'mobile';
+    setViewMode: (mode: 'desktop' | 'tablet' | 'mobile') => void;
 }
 
 const EditorContext = createContext<EditorContextType | undefined>(undefined);
@@ -31,11 +33,8 @@ const DEFAULT_SCHEMA: ScreenSchema = {
     root: {
         id: "root-container",
         type: "container",
-        props: { className: "min-h-[500px] p-8 border-2 border-dashed border-zinc-200 rounded-xl bg-white" },
-        children: [
-            { id: "intro-text", type: "heading", props: { text: "Welcome to the Builder", level: 1 } },
-            { id: "sub-text", type: "text", props: { content: "Click any element to edit its properties." } }
-        ]
+        props: { className: "min-h-screen bg-white" },
+        children: []
     }
 };
 
@@ -44,16 +43,32 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [hoveredId, setHoveredId] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [viewMode, setViewMode] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
 
     const selectComponent = useCallback((id: string | null) => {
         setSelectedId(id);
     }, []);
 
     const updateComponentProps = useCallback((id: string, newProps: any) => {
-        setSchema((prev) => ({
-            ...prev,
-            root: updateNode(prev.root, id, { props: newProps })
-        }));
+        setSchema((prev) => {
+            const currentNode = findNode(prev.root, id);
+            if (!currentNode) return prev;
+
+            // Deep merge props, especially for nested objects like style
+            const mergedProps = {
+                ...currentNode.props,
+                ...newProps,
+                style: {
+                    ...(currentNode.props?.style || {}),
+                    ...(newProps.style || {})
+                }
+            };
+
+            return {
+                ...prev,
+                root: updateNode(prev.root, id, { props: mergedProps })
+            };
+        });
     }, []);
 
     const deleteComponent = useCallback((id: string) => {
@@ -75,24 +90,34 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
         }));
     }, []);
 
-    const addComponent = useCallback((parentId: string, type: any) => {
-        // Create a new unique ID
-        const newId = `${type}-${Date.now().toString(36)}`;
+    // Action: Add a new component (or tree of components)
+    const addComponent = useCallback((parentId: string, typeOrNode: any) => {
+        let newComponent: ComponentSchema;
 
-        const newComponent: ComponentSchema = {
-            id: newId,
-            type: type,
-            props: { text: "New " + type, content: "New Content" }, // Default props
-            children: []
-        };
+        if (typeof typeOrNode === 'string') {
+            // It's a simple type string, create a default node
+            const id = `${typeOrNode}-${Date.now().toString(36)}`;
+            newComponent = {
+                id,
+                type: typeOrNode as any,
+                props: { text: "New " + typeOrNode, content: "New Content" },
+                children: []
+            };
+        } else {
+            // It's already a full component object (template)
+            // We need to ensure IDs are unique if we're cloning, but templates usually generate new IDs
+            newComponent = typeOrNode;
+        }
 
         setSchema((prev) => ({
             ...prev,
             root: appendChild(prev.root, parentId, newComponent)
         }));
 
-        // Auto-select the new item
-        setSelectedId(newId);
+        // Auto-select the new item (or its root)
+        if (newComponent.id) {
+            setSelectedId(newComponent.id);
+        }
     }, []);
 
     const saveSchema = useCallback(async () => {
@@ -135,7 +160,9 @@ export const EditorProvider = ({ children }: { children: ReactNode }) => {
             moveComponent,
             addComponent,
             saveSchema,
-            isSaving
+            isSaving,
+            viewMode,
+            setViewMode
         }}>
             {children}
         </EditorContext.Provider>

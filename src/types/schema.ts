@@ -6,7 +6,7 @@ export type ComponentType =
     | "text" | "heading" | "button" | "icon" | "image" | "divider" | "link" | "list"
     | "icon-button" | "button-group" | "fab"
     // Forms
-    | "form" | "form-group" | "input" | "select" | "checkbox" | "radio" | "date-picker" | "textarea"
+    | "form" | "form-group" | "label" | "input" | "select" | "checkbox" | "radio" | "date-picker" | "textarea"
     | "toggle" | "slider" | "file-upload" | "color-picker" | "rating" | "rich-text-editor"
     // Display
     | "card" | "table" | "table-head" | "table-row" | "table-cell" | "badge" | "avatar" | "list"

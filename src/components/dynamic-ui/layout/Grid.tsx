@@ -8,12 +8,18 @@ const alignMap: Record<string, string> = {
 };
 
 const colMap: Record<number, string> = {
-    1: "md:grid-cols-1",
-    2: "md:grid-cols-2",
-    3: "md:grid-cols-3",
-    4: "md:grid-cols-4",
-    5: "md:grid-cols-5",
-    6: "md:grid-cols-6",
+    1: "grid-cols-1",
+    2: "grid-cols-2",
+    3: "grid-cols-3",
+    4: "grid-cols-4",
+    5: "grid-cols-5",
+    6: "grid-cols-6",
+    7: "grid-cols-7",
+    8: "grid-cols-8",
+    9: "grid-cols-9",
+    10: "grid-cols-10",
+    11: "grid-cols-11",
+    12: "grid-cols-12",
 };
 
 const gapMap: Record<number, string> = {
@@ -55,24 +61,100 @@ const marginMap: Record<number, string> = {
 export const Grid: React.FC<any> = ({
     children,
     cols = 2,
+    rows,
     gap = 4,
     align = "start",
     width = "full",
     padding = 0,
     margin = 0,
-}) => (
-    <div
-        className={[
-            "grid",
-            "grid-cols-1",
-            colMap[cols],
-            gapMap[gap],
-            alignMap[align],
-            widthMap[width],
-            paddingMap[padding],
-            marginMap[margin],
-        ].join(" ")}
-    >
-        {children}
-    </div>
-);
+    className,
+    style,
+    rowStructure
+}) => {
+    // If rowStructure is defined, use it; otherwise fall back to uniform grid
+    if (rowStructure && Object.keys(rowStructure).length > 0) {
+        const childArray = React.Children.toArray(children);
+        let childIndex = 0;
+
+        return (
+            <div
+                className={[
+                    "flex flex-col",
+                    gapMap[gap],
+                    widthMap[width],
+                    paddingMap[padding],
+                    marginMap[margin],
+                    className || ""
+                ].join(" ")}
+                style={style}
+            >
+                {Object.entries(rowStructure)
+                    .sort(([a], [b]) => parseInt(a) - parseInt(b))
+                    .map(([rowIdx, colCount]: [string, any]) => {
+                        const numCols = parseInt(String(colCount)) || 0;
+                        if (numCols <= 0) return null;
+
+                        const rowChildren = [];
+                        for (let i = 0; i < numCols; i++) {
+                            const child = childArray[childIndex];
+                            if (child) {
+                                rowChildren.push(child);
+                            } else {
+                                // Add placeholder for empty cells
+                                rowChildren.push(
+                                    <div
+                                        key={`placeholder-${rowIdx}-${i}`}
+                                        className="min-h-24 border-2 border-dashed border-zinc-300 bg-zinc-50 rounded-lg flex items-center justify-center text-zinc-400 text-xs"
+                                    >
+                                        <div className="text-center">
+                                            <div className="font-mono text-[10px]">R{parseInt(rowIdx) + 1}C{i + 1}</div>
+                                            <div className="text-[9px] mt-1">Empty Cell</div>
+                                        </div>
+                                    </div>
+                                );
+                            }
+                            childIndex++;
+                        }
+
+                        return (
+                            <div
+                                key={rowIdx}
+                                className={[
+                                    "grid",
+                                    colMap[numCols] || "grid-cols-1",
+                                    gapMap[gap],
+                                    alignMap[align]
+                                ].join(" ")}
+                            >
+                                {rowChildren}
+                            </div>
+                        );
+                    })}
+            </div>
+        );
+    }
+
+    // Fallback to uniform grid
+    const gridStyle = {
+        ...style,
+        ...(rows && { gridTemplateRows: `repeat(${rows}, minmax(0, 1fr))` })
+    };
+
+    return (
+        <div
+            className={[
+                "grid",
+                colMap[cols],
+                gapMap[gap],
+                alignMap[align],
+                widthMap[width],
+                paddingMap[padding],
+                marginMap[margin],
+                className || ""
+            ].join(" ")}
+            style={gridStyle}
+        >
+            {children}
+        </div>
+    );
+};

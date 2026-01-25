@@ -55,15 +55,12 @@ export default function PropertyPanel() {
         updateComponentProps(node.id!, newProps);
     };
 
-    const handleStyleChange = (key: string, value: any) => {
+    const handleClearStyleProperty = (propertyName: string) => {
         if (!node) return;
-        const newStyle = { ...(node.style || {}), [key]: value };
-        // We might need an updateComponentStyle in context, but for now we can use updateComponentProps pattern or similar
-        // Let's assume style is part of the node structure we can update
-        // I will use updateNode from builder-utils via a new context method or just update props for now if style is in props
-        // Actually, schema.ts has 'style' as a top level property on ComponentSchema.
-        // I should update builder-context to support updateComponentStyle.
-        // For Phase 2, let's stick to props or add the context method.
+        const currentStyle = { ...(node.props?.style || {}) };
+        delete currentStyle[propertyName];
+        const newProps = { ...node.props, style: currentStyle };
+        updateComponentProps(node.id!, newProps);
     };
 
     return (
@@ -112,51 +109,60 @@ export default function PropertyPanel() {
                     </div>
                 </div>
 
-                {/* Generic Text/Content Inputs */}
-                {(node.props?.text !== undefined || node.props?.label !== undefined || node.props?.content !== undefined || node.props?.placeholder !== undefined) && (
+                {/* Content Configuration */}
+                {(['text', 'heading', 'button', 'link', 'badge', 'label', 'image'].includes(node.type)) && (
                     <div className="space-y-4">
                         <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block">Content</label>
 
-                        {node.props?.text !== undefined && (
-                            <PropertyField label="Text">
+                        {/* Text Content */}
+                        {(node.type === 'text' || node.type === 'heading' || node.type === 'badge' || node.type === 'label') && (
+                            <PropertyField label="Text Content">
                                 <input
                                     type="text"
-                                    value={node.props.text}
-                                    onChange={(e) => handleChange("text", e.target.value)}
+                                    value={node.props?.text || node.props?.children || ""}
+                                    onChange={(e) => {
+                                        // Update both text and children in one go to prevent state overwrite issues
+                                        const val = e.target.value;
+                                        updateComponentProps(node.id!, {
+                                            ...node.props,
+                                            text: val,
+                                            children: val
+                                        });
+                                    }}
                                     className="w-full text-sm border border-zinc-200 rounded p-2 focus:ring-1 ring-blue-500 outline-none"
                                 />
                             </PropertyField>
                         )}
 
-                        {node.props?.label !== undefined && (
+                        {/* Button/Link Content */}
+                        {(node.type === 'button' || node.type === 'link') && (
                             <PropertyField label="Label">
                                 <input
                                     type="text"
-                                    value={node.props.label}
-                                    onChange={(e) => handleChange("label", e.target.value)}
+                                    value={node.props?.children || node.props?.text || node.props?.label || ""}
+                                    onChange={(e) => {
+                                        const val = e.target.value;
+                                        updateComponentProps(node.id!, {
+                                            ...node.props,
+                                            children: val,
+                                            text: val,
+                                            label: val
+                                        });
+                                    }}
                                     className="w-full text-sm border border-zinc-200 rounded p-2 focus:ring-1 ring-blue-500 outline-none"
                                 />
                             </PropertyField>
                         )}
 
-                        {node.props?.placeholder !== undefined && (
-                            <PropertyField label="Placeholder">
+                        {/* Image Source */}
+                        {node.type === 'image' && (
+                            <PropertyField label="Image URL">
                                 <input
                                     type="text"
-                                    value={node.props.placeholder}
-                                    onChange={(e) => handleChange("placeholder", e.target.value)}
+                                    value={node.props?.src || ""}
+                                    onChange={(e) => handleChange("src", e.target.value)}
+                                    placeholder="https://example.com/image.jpg"
                                     className="w-full text-sm border border-zinc-200 rounded p-2 focus:ring-1 ring-blue-500 outline-none"
-                                />
-                            </PropertyField>
-                        )}
-
-                        {node.props?.content !== undefined && (
-                            <PropertyField label="Content Body">
-                                <textarea
-                                    value={node.props.content}
-                                    onChange={(e) => handleChange("content", e.target.value)}
-                                    rows={4}
-                                    className="w-full text-sm border border-zinc-200 rounded p-2 focus:ring-1 ring-blue-500 outline-none resize-none"
                                 />
                             </PropertyField>
                         )}
@@ -178,6 +184,8 @@ export default function PropertyPanel() {
                                 <option value={2}>Heading 2</option>
                                 <option value={3}>Heading 3</option>
                                 <option value={4}>Heading 4</option>
+                                <option value={5}>Heading 5</option>
+                                <option value={6}>Heading 6</option>
                             </select>
                         </PropertyField>
                     )}
@@ -193,6 +201,7 @@ export default function PropertyPanel() {
                                 <option value="secondary">Secondary (Zinc)</option>
                                 <option value="outline">Outline</option>
                                 <option value="danger">Danger (Red)</option>
+                                <option value="custom">Custom / None</option>
                             </select>
                         </PropertyField>
                     )}
@@ -237,6 +246,29 @@ export default function PropertyPanel() {
                                 className="w-full text-sm border border-zinc-200 rounded p-2"
                             />
                         </PropertyField>
+                    )}
+
+                    {(node.type === 'input' || node.type === 'textarea' || node.type === 'select') && (
+                        <>
+                            <PropertyField label="Label Text">
+                                <input
+                                    type="text"
+                                    value={node.props?.label || ""}
+                                    onChange={(e) => handleChange("label", e.target.value)}
+                                    placeholder="Enter label text"
+                                    className="w-full text-sm border border-zinc-200 rounded p-2"
+                                />
+                            </PropertyField>
+                            <PropertyField label="Placeholder">
+                                <input
+                                    type="text"
+                                    value={node.props?.placeholder || ""}
+                                    onChange={(e) => handleChange("placeholder", e.target.value)}
+                                    placeholder="Enter placeholder text"
+                                    className="w-full text-sm border border-zinc-200 rounded p-2"
+                                />
+                            </PropertyField>
+                        </>
                     )}
 
                     {node.type === 'link' && (
@@ -463,19 +495,107 @@ export default function PropertyPanel() {
                     )}
 
                     {node.type === 'grid' && (
-                        <PropertyField label="Grid Columns">
-                            <input
-                                type="range"
-                                min="1"
-                                max="6"
-                                step="1"
-                                value={node.props?.columns || 1}
-                                onChange={(e) => handleChange("columns", parseInt(e.target.value))}
-                                className="w-full accent-blue-500"
-                            />
-                            <div className="flex justify-between text-[10px] text-zinc-400 font-mono mt-1">
-                                <span>1 col</span>
-                                <span>6 cols</span>
+                        <PropertyField label="Grid Layout Builder">
+                            <div className="space-y-3">
+                                {/* Visual Grid Configurator */}
+                                <div className="bg-zinc-50 p-3 rounded-lg border border-zinc-200">
+                                    <div className="space-y-1">
+                                        {Array.from({ length: 12 }, (_, rowIndex) => {
+                                            const currentRowCols = node.props?.rowStructure?.[rowIndex] || 0;
+                                            const isRowActive = currentRowCols > 0;
+
+                                            return (
+                                                <div key={rowIndex} className="flex items-center gap-1">
+                                                    {/* Row label */}
+                                                    <div className={`w-6 text-[9px] font-bold text-center ${isRowActive ? 'text-blue-600' : 'text-zinc-300'}`}>
+                                                        R{rowIndex + 1}
+                                                    </div>
+
+                                                    {/* Column cells for this row */}
+                                                    <div className="flex gap-0.5 flex-1">
+                                                        {Array.from({ length: 12 }, (_, colIndex) => {
+                                                            const isActive = colIndex < currentRowCols;
+
+                                                            return (
+                                                                <button
+                                                                    key={colIndex}
+                                                                    onClick={() => {
+                                                                        const newRowStructure = { ...(node.props?.rowStructure || {}) };
+                                                                        if (colIndex === 0) {
+                                                                            // Clicking first cell toggles row on/off
+                                                                            newRowStructure[rowIndex] = currentRowCols > 0 ? 0 : 1;
+                                                                        } else {
+                                                                            // Clicking other cells sets column count
+                                                                            newRowStructure[rowIndex] = colIndex + 1;
+                                                                        }
+                                                                        handleChange("rowStructure", newRowStructure);
+                                                                    }}
+                                                                    className={`h-4 flex-1 rounded-sm transition-all ${isActive
+                                                                        ? 'bg-blue-500 hover:bg-blue-600 shadow-sm'
+                                                                        : 'bg-zinc-200 hover:bg-zinc-300'
+                                                                        }`}
+                                                                    title={`Row ${rowIndex + 1}, Col ${colIndex + 1}`}
+                                                                />
+                                                            );
+                                                        })}
+                                                    </div>
+
+                                                    {/* Column count display */}
+                                                    {isRowActive && (
+                                                        <div className="w-8 text-[9px] font-mono text-blue-600 text-right font-bold">
+                                                            ×{currentRowCols}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                {/* Summary */}
+                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-2">
+                                    <div className="text-[9px] font-bold text-blue-700 uppercase mb-1">Grid Structure</div>
+                                    <div className="space-y-0.5">
+                                        {Object.entries(node.props?.rowStructure || {}).map(([rowIdx, cols]: [string, any]) => {
+                                            if (cols > 0) {
+                                                return (
+                                                    <div key={rowIdx} className="text-[10px] text-blue-600 font-mono flex justify-between">
+                                                        <span>Row {parseInt(rowIdx) + 1}:</span>
+                                                        <span className="font-bold">{cols} columns</span>
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
+                                        })}
+                                        {Object.values(node.props?.rowStructure || {}).every((v: any) => v === 0 || !v) && (
+                                            <div className="text-[10px] text-zinc-400 italic text-center">
+                                                Click cells to build your grid
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Quick actions */}
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => handleChange("rowStructure", {})}
+                                        className="flex-1 py-1.5 text-[9px] font-bold text-zinc-500 hover:text-red-600 bg-white hover:bg-red-50 border border-zinc-200 hover:border-red-300 rounded transition-all"
+                                    >
+                                        CLEAR ALL
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            const uniform: Record<number, number> = {};
+                                            for (let i = 0; i < 3; i++) {
+                                                uniform[i] = 3;
+                                            }
+                                            handleChange("rowStructure", uniform);
+                                        }}
+                                        className="flex-1 py-1.5 text-[9px] font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded transition-all"
+                                    >
+                                        3×3 PRESET
+                                    </button>
+                                </div>
                             </div>
                         </PropertyField>
                     )}
@@ -550,56 +670,113 @@ export default function PropertyPanel() {
                         </PropertyField>
                     </div>
 
-                    <PropertyField label="Background Color">
+                    <PropertyField label="Custom Colors">
                         <div className="space-y-3">
-                            <div className="flex gap-1.5 flex-wrap">
-                                {[
-                                    { name: 'None', class: '' },
-                                    { name: 'White', class: 'bg-white border-zinc-200' },
-                                    { name: 'Gray', class: 'bg-zinc-50 border-zinc-100' },
-                                    { name: 'Zinc 100', class: 'bg-zinc-100 border-zinc-200' },
-                                    { name: 'Blue', class: 'bg-blue-50 border-blue-100' },
-                                    { name: 'Indigo 100', class: 'bg-indigo-50 border-indigo-100' },
-                                    { name: 'Emerald', class: 'bg-emerald-50 border-emerald-100' },
-                                    { name: 'Amber', class: 'bg-amber-50 border-amber-100' },
-                                    { name: 'Rose', class: 'bg-rose-50 border-rose-100' },
-                                    { name: 'Slate 200', class: 'bg-slate-200 border-slate-300' }
-                                ].map((c) => (
-                                    <button
-                                        key={c.name}
-                                        onClick={() => {
+                            {/* Background Color */}
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wide">Background</label>
+                                    {node.props?.style?.backgroundColor && (
+                                        <button
+                                            onClick={() => handleClearStyleProperty('backgroundColor')}
+                                            className="text-[9px] text-red-500 hover:text-red-700 font-bold"
+                                        >
+                                            Clear
+                                        </button>
+                                    )}
+                                </div>
+                                <div className={`flex items-center gap-2 p-2 border-2 rounded-lg bg-white transition-all ${node.props?.style?.backgroundColor
+                                    ? 'border-blue-500 shadow-sm shadow-blue-500/20'
+                                    : 'border-zinc-200 hover:border-zinc-300'
+                                    }`}>
+                                    <input
+                                        type="color"
+                                        value={node.props?.style?.backgroundColor || "#ffffff"}
+                                        onChange={(e) => {
+                                            const newStyle = { ...(node.props?.style || {}), backgroundColor: e.target.value };
+                                            handleChange("style", newStyle);
+
+                                            // Remove conflicting background classes
                                             const current = node.props?.className || "";
-                                            // Improved regex to catch more background classes
                                             const filtered = current
-                                                .replace(/bg-(white|zinc-\w+|blue-\w+|emerald-\w+|amber-\w+|rose-\w+|slate-\w+|indigo-\w+)/g, "")
-                                                .replace(/border-(zinc-\w+|blue-\w+|emerald-\w+|amber-\w+|rose-\w+|slate-\w+|indigo-\w+)/g, "")
+                                                .replace(/bg-(white|transparent|zinc-\w+|blue-\w+|emerald-\w+|amber-\w+|rose-\w+|slate-\w+|indigo-\w+)/g, "")
+                                                .replace(/bg-gradient-to-\w+/g, "")
+                                                .replace(/from-\w+-\d+/g, "")
+                                                .replace(/to-\w+-\d+/g, "")
                                                 .trim();
-                                            handleChange("className", `${filtered} ${c.class}`.trim());
+                                            if (filtered !== current) {
+                                                handleChange("className", filtered);
+                                            }
                                         }}
-                                        className={`w-6 h-6 rounded-md border transition-all hover:scale-110 active:scale-90
-                                            ${(node.props?.className || "").includes(c.class.split(' ')[0]) && c.class !== '' ? 'ring-2 ring-blue-500 ring-offset-1 shadow-sm' : ''}
-                                            ${c.class || 'bg-zinc-200 bg-[conic-gradient(#eee_25%,#fff_0_50%,#eee_0_75%,#fff_0)] bg-[length:4px_4px]'}
-                                        `}
-                                        title={c.name}
+                                        className="w-10 h-10 rounded-md border-0 cursor-pointer"
                                     />
-                                ))}
+                                    <div className="flex-1">
+                                        <div className={`text-xs font-mono ${node.props?.style?.backgroundColor ? 'text-blue-600 font-bold' : 'text-zinc-400'
+                                            }`}>
+                                            {node.props?.style?.backgroundColor || 'Not set'}
+                                        </div>
+                                    </div>
+                                    {node.props?.style?.backgroundColor && (
+                                        <div className="flex items-center gap-1 px-2 py-1 bg-blue-50 rounded text-blue-600">
+                                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                            </svg>
+                                            <span className="text-[9px] font-bold">ACTIVE</span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
-                            {/* Color Code Display */}
-                            <div className="flex items-center gap-2 bg-zinc-50 p-2 rounded border border-zinc-100 group">
-                                <span className="text-[10px] font-mono text-zinc-500 flex-1 truncate">
-                                    {(node.props?.className || "").match(/bg-[^\s]*/)?.[0] || "No Background"}
-                                </span>
-                                <button
-                                    onClick={() => {
-                                        const code = (node.props?.className || "").match(/bg-[^\s]*/)?.[0] || "";
-                                        if (code) navigator.clipboard.writeText(code);
-                                    }}
-                                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-zinc-200 rounded"
-                                    title="Copy Class"
-                                >
-                                    <svg className="w-3 h-3 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg>
-                                </button>
+                            {/* Text Color */}
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wide">Text Color</label>
+                                    {node.props?.style?.color && (
+                                        <button
+                                            onClick={() => handleClearStyleProperty('color')}
+                                            className="text-[9px] text-red-500 hover:text-red-700 font-bold"
+                                        >
+                                            Clear
+                                        </button>
+                                    )}
+                                </div>
+                                <div className={`flex items-center gap-2 p-2 border-2 rounded-lg bg-white transition-all ${node.props?.style?.color
+                                    ? 'border-blue-500 shadow-sm shadow-blue-500/20'
+                                    : 'border-zinc-200 hover:border-zinc-300'
+                                    }`}>
+                                    <input
+                                        type="color"
+                                        value={node.props?.style?.color || "#000000"}
+                                        onChange={(e) => {
+                                            const newStyle = { ...(node.props?.style || {}), color: e.target.value };
+                                            handleChange("style", newStyle);
+
+                                            // Remove conflicting text color classes
+                                            const current = node.props?.className || "";
+                                            const filtered = current
+                                                .replace(/text-(zinc-\w+|white|black|blue-\w+|red-\w+|green-\w+|yellow-\w+)/g, "")
+                                                .trim();
+                                            if (filtered !== current) {
+                                                handleChange("className", filtered);
+                                            }
+                                        }}
+                                        className="w-10 h-10 rounded-md border-0 cursor-pointer"
+                                    />
+                                    <div className="flex-1">
+                                        <div className={`text-xs font-mono ${node.props?.style?.color ? 'text-blue-600 font-bold' : 'text-zinc-400'
+                                            }`}>
+                                            {node.props?.style?.color || 'Not set'}
+                                        </div>
+                                    </div>
+                                    {node.props?.style?.color && (
+                                        <div className="flex items-center gap-1 px-2 py-1 bg-blue-50 rounded text-blue-600">
+                                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                            </svg>
+                                            <span className="text-[9px] font-bold">ACTIVE</span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </PropertyField>

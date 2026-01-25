@@ -23,8 +23,13 @@ export const Container: React.FC<any> = ({
     children,
     maxWidth = "7xl",
     padding = 4,
+    className,
+    style
 }) => (
-    <div className={`${maxWidthMap[maxWidth]} mx-auto ${paddingMap[padding]}`}>
+    <div
+        className={`${maxWidthMap[maxWidth]} mx-auto ${paddingMap[padding]} ${className || ''}`}
+        style={style}
+    >
         {children}
     </div>
 );
