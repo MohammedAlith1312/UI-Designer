@@ -2,9 +2,10 @@
   "branding": {
     "primary": "#3b82f6",
     "secondary": "#1e293b",
-    "darkMode": true
+    "darkMode": false
   },
   "typography": {
-    "baseSize": 16
+    "headingFont": "Roboto",
+    "baseSize": 20
   }
 }
