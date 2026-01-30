@@ -47,9 +47,9 @@
           "label": "Page Builder (Add Sections)",
           "type": "block",
           "blocks": [
-            { "label": "Hero Section", "component": "hero-section" },
-            { "label": "Features Grid", "component": "features-section" },
-            { "label": "Call to Action", "component": "cta-section" }
+            { "name": "hero", "label": "Hero Section", "component": "hero-section" }
+{ "name": "features", "label": "Features Grid", "component": "features-section" }
+{ "name": "cta", "label": "Call to Action", "component": "cta-section" }
           ]
         }
       ]
