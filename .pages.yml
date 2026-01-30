@@ -1,0 +1,91 @@
+{
+  "media": "public/uploads",
+  "content": [
+    {
+      "name": "settings",
+      "label": "Global Design System",
+      "type": "file",
+      "path": "content/settings.json",
+      "fields": [
+        {
+          "name": "branding",
+          "label": "Brand Colors",
+          "type": "object",
+          "fields": [
+            { "name": "primary", "label": "Primary Hex", "type": "string", "default": "#3b82f6" },
+            { "name": "secondary", "label": "Secondary Hex", "type": "string", "default": "#1e293b" },
+            { "name": "darkMode", "label": "Enable Dark Mode", "type": "boolean", "default": true }
+          ]
+        },
+        {
+          "name": "typography",
+          "label": "Typography",
+          "type": "object",
+          "fields": [
+            {
+              "name": "headingFont",
+              "label": "Heading Font Family",
+              "type": "select",
+              "options": { "values": ["Inter", "Roboto", "Playfair Display", "Montserrat"] }
+            },
+            { "name": "baseSize", "label": "Base Font Size (px)", "type": "number", "default": 16 }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "pages",
+      "label": "Dynamic Pages",
+      "type": "collection",
+      "path": "content/pages",
+      "format": "json",
+      "fields": [
+        { "name": "title", "label": "Page Title", "type": "string" },
+        { "name": "slug", "label": "URL Slug", "type": "string" },
+        {
+          "name": "sections",
+          "label": "Page Builder (Add Sections)",
+          "type": "block",
+          "blocks": [
+            { "label": "Hero Section", "component": "hero-section" },
+            { "label": "Features Grid", "component": "features-section" },
+            { "label": "Call to Action", "component": "cta-section" }
+          ]
+        }
+      ]
+    }
+  ],
+  "components": {
+    "hero-section": {
+      "fields": [
+        { "name": "headline", "label": "Main Headline", "type": "string" },
+        { "name": "subtext", "label": "Sub-headline", "type": "text" },
+        { "name": "backgroundImage", "label": "Hero Image", "type": "image" },
+        { "name": "alignment", "label": "Text Alignment", "type": "select", "options": { "values": ["left", "center", "right"] } }
+      ]
+    },
+    "features-section": {
+      "fields": [
+        { "name": "title", "label": "Section Title", "type": "string" },
+        {
+          "name": "items",
+          "label": "Feature Items",
+          "type": "object",
+          "list": true,
+          "fields": [
+            { "name": "icon", "label": "Icon Name", "type": "string" },
+            { "name": "label", "label": "Title", "type": "string" },
+            { "name": "desc", "label": "Description", "type": "text" }
+          ]
+        }
+      ]
+    },
+    "cta-section": {
+      "fields": [
+        { "name": "text", "label": "Button Text", "type": "string" },
+        { "name": "link", "label": "Button Link", "type": "string" },
+        { "name": "vibrant", "label": "Vibrant Background", "type": "boolean" }
+      ]
+    }
+  }
+}
