@@ -6,6 +6,7 @@
       "label": "Global Design System",
       "type": "file",
       "path": "content/settings.json",
+      "format": "json",
       "fields": [
         {
           "name": "branding",
@@ -38,6 +39,7 @@
       "label": "Dynamic Pages",
       "type": "collection",
       "path": "content/pages",
+      "filename": "{slug}.json",
       "format": "json",
       "fields": [
         { "name": "title", "label": "Page Title", "type": "string" },
@@ -48,8 +50,8 @@
           "type": "block",
           "blocks": [
             { "name": "hero", "label": "Hero Section", "component": "hero-section" },
-{ "name": "features", "label": "Features Grid", "component": "features-section" },
-{ "name": "cta", "label": "Call to Action", "component": "cta-section" }
+            { "name": "features", "label": "Features Grid", "component": "features-section" },
+            { "name": "cta", "label": "Call to Action", "component": "cta-section" }
           ]
         }
       ]
