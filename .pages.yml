@@ -39,7 +39,7 @@
       "label": "Dynamic Pages",
       "type": "collection",
       "path": "src/content/pages",
-      "filename": "{slug}.json",
+      "filename": "{page}.json",
       "format": "json",
       "fields": [
         { "name": "title", "label": "Page Title", "type": "string" },
