@@ -6,7 +6,7 @@
       "label": "Global Design System",
       "type": "file",
       "path": "src/content/settings.json",
-      "format": "json",
+      "format": "java",
       "fields": [
         {
           "name": "branding",
