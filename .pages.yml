@@ -5,7 +5,7 @@
       "name": "settings",
       "label": "Global Design System",
       "type": "file",
-      "path": "content/settings.json",
+      "path": "src/content/settings.json",
       "format": "json",
       "fields": [
         {
