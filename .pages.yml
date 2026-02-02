@@ -78,7 +78,8 @@
           "fields": [
             { "name": "icon", "label": "Icon Name", "type": "string" },
             { "name": "label", "label": "Title", "type": "string" },
-            { "name": "desc", "label": "Description", "type": "text" }
+            { "name": "desc", "label": "Description", "type": "text" },
+            { "name": "id", "label": "Unique ID","type": "uuid" }
           ]
         }
       ]
