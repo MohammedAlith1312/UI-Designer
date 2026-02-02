@@ -48,6 +48,7 @@
           "name": "sections",
           "label": "Page Builder (Add Sections)",
           "type": "block",
+          "list": true, 
           "blocks": [
             { "name": "hero", "label": "Hero Section", "component": "hero-section" },
             { "name": "features", "label": "Features Grid", "component": "features-section" },
