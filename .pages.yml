@@ -62,7 +62,7 @@
       "fields": [
         { "name": "headline", "label": "Main Headline", "type": "string" },
         { "name": "subtext", "label": "Sub-headline", "type": "text" },
-        { "name": "backgroundImage", "label": "Hero Image", "type": "image" },
+        # { "name": "backgroundImage", "label": "Hero Image", "type": "image" },
         { "name": "alignment", "label": "Text Alignment", "type": "select", "options": { "values": ["left", "center", "right"] } }
       ]
     },
