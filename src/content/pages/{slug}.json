@@ -1,9 +1,10 @@
 {
   "title": "Hero",
   "slug": "new",
-  "sections": {
-    "_block": "hero",
-    "headline": "sfgdggdgdgd",
-    "subtext": "dfsfsfffs"
-  }
+  "sections": [
+    {
+      "_block": "hero",
+      "backgroundImage": "/public/images/Screenshot (1).png"
+    }
+  ]
 }
