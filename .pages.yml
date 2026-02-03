@@ -39,8 +39,8 @@
       "label": "Dynamic Pages",
       "type": "collection",
       "path": "src/content/pages",
-      "filename": "{page}.json",
-      "format": "json",
+      "filename": "{page}.tsx",
+      "format": "tsx",
       "fields": [
         { "name": "title", "label": "Page Title", "type": "string" },
         { "name": "slug", "label": "URL Slug", "type": "string" },
