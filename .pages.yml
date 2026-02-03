@@ -40,7 +40,7 @@
       "type": "collection",
       "path": "src/content/pages",
       "filename": "{page}.tsx",
-      "format": "tsx",
+      "format": "json",
       "fields": [
         { "name": "title", "label": "Page Title", "type": "string" },
         { "name": "slug", "label": "URL Slug", "type": "string" },
